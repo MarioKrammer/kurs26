@@ -1,1 +1,15 @@
+{
+  "name": "PingPong",
+  "theme_color": "#2196f3",
+  "background_color": "#2196f3",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/index.html"
+    "icons": [
+    {
+      "src": "icons/images.jpg",
+      "sizes": "72x72",
+      "type": "image/jpg"
+    }]
 
+}
