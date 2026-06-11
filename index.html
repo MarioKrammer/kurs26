@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bouncing Ball</title>
+  </head>
+  <body>
+    <canvas
+      id="c"
+      width="500"
+      height="400"
+      style="
+        border: 1px solid black;
+        background: #1a1a2e;
+        display: block;
+        margin: auto;
+      "
+    ></canvas>
+    <p style="text-align: center; font-size: 13px">
+      Pfeiltasten zum Bewegen | Enter zum Starten | R zum Neustarten
+    </p>
+
+    <script>
+      const canvas = document.getElementById("c");
+      const ctx = canvas.getContext("2d");
+      const WIDTH = canvas.width,
+        HEIGHT = canvas.height;
+
+      const BALL_R = 10;
+      const PADL_W = 120,
+        PADL_H = 12,
+        PADL_Y = HEIGHT - 40;
+
+      let bx, by, dx, dy, padlx, timer, running, lives, score;
+
+      function reset() {
+        bx = WIDTH / 2;
+        by = HEIGHT / 2;
+        dx = 3;
+        dy = -3;
+        padlx = (WIDTH - PADL_W) / 2;
+        lives = 3;
+        score = 0;
+        running = false;
+        clearInterval(timer);
+        draw();
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+        // Ball zeichnen
+        ctx.fillStyle = "#e63946";
+        ctx.beginPath();
+        ctx.arc(bx, by, BALL_R, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Paddle zeichnen
+        ctx.fillStyle = "#4cc9f0";
+        ctx.fillRect(padlx, PADL_Y, PADL_W, PADL_H);
+
+        // Leben und Punkte anzeigen
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "14px sans-serif";
+        ctx.fillText("Leben: " + lives, 10, 24);
+        ctx.fillText("Punkte: " + score, WIDTH - 110, 24);
+
+        // Starttext
+        if (!running) {
+          ctx.fillStyle = "rgba(255,255,255,0.85)";
+          ctx.font = "bold 18px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("Enter dr\u00FCcken zum Starten", WIDTH / 2, HEIGHT / 2);
+          ctx.textAlign = "left";
+        }
+      }
+
+      function update() {
+        // Ball bewegen
+        bx += dx;
+        by += dy;
+
+        // Linke und rechte Wand
+        if (bx - BALL_R <= 0) {
+          bx = BALL_R;
+          dx = Math.abs(dx);
+        }
+        if (bx + BALL_R >= WIDTH) {
+          bx = WIDTH - BALL_R;
+          dx = -Math.abs(dx);
+        }
+
+        // Obere Wand
+        if (by - BALL_R <= 0) {
+          by = BALL_R;
+          dy = Math.abs(dy);
+          score++;
+        }
+
+        // Paddle-Kollision
+        if (
+          by + BALL_R >= PADL_Y &&
+          by + BALL_R <= PADL_Y + PADL_H + Math.abs(dy) &&
+          bx >= padlx &&
+          bx <= padlx + PADL_W
+        ) {
+          by = PADL_Y - BALL_R;
+          dy = -Math.abs(dy);
+          // Abprallwinkel je nach Auftreffpunkt
+          let hit = (bx - padlx) / PADL_W;
+          dx = (hit - 0.5) * 8;
+          score++;
+        }
+
+        // Ball fällt unten raus → Leben verlieren
+        if (by + BALL_R >= HEIGHT) {
+          lives--;
+          if (lives <= 0) {
+            clearInterval(timer);
+            running = false;
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 24px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(
+              "Game Over! Punkte: " + score,
+              WIDTH / 2,
+              HEIGHT / 2 - 10
+            );
+            ctx.font = "14px sans-serif";
+            ctx.fillText(
+              "R dr\u00FCcken zum Neustarten",
+              WIDTH / 2,
+              HEIGHT / 2 + 20
+            );
+            ctx.textAlign = "left";
+            return;
+          }
+          // Noch Leben übrig → Ball zurücksetzen
+          bx = WIDTH / 2;
+          by = HEIGHT / 2;
+          dx = 3;
+          dy = -3;
+          clearInterval(timer);
+          running = false;
+          draw();
+          return;
+        }
+
+        draw();
+      }
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowLeft" && padlx > 0) {
+          padlx = Math.max(0, padlx - 15);
+          if (!running) draw();
+        }
+        if (event.key === "ArrowRight" && padlx + PADL_W < WIDTH) {
+          padlx = Math.min(WIDTH - PADL_W, padlx + 15);
+          if (!running) draw();
+        }
+        if (event.key === "Enter" && !running) {
+          running = true;
+          timer = setInterval(update, 5);
+        }
+        if (event.key === "r" || event.key === "R") {
+          reset();
+        }
+        event.preventDefault();
+      });
+
+      reset();
+    </script>
+  </body>
+</html>
