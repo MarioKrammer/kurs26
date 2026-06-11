@@ -41,6 +41,11 @@ maximum-scale=1.0, user-scalable=no" />
     </p>
 
     <script>
+      if ('serviceWorker' in navigator) {
+  	window.addEventListener('load', function() {
+    		navigator.serviceWorker.register('./service-worker.js');
+		console.log("Service Worker registered");	  
+ 	});
       const canvas = document.getElementById("c");
       const ctx = canvas.getContext("2d");
       const WIDTH = canvas.width,
